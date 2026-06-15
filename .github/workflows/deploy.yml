@@ -1,0 +1,88 @@
+name: Deploy
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [main]
+
+# Only deploy when CI succeeded on main.
+jobs:
+  build-and-push:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image: ${{ steps.meta.outputs.image }}
+      sha: ${{ steps.meta.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compute image metadata
+        id: meta
+        run: |
+          REPO=$(echo "${{ github.repository_owner }}/monitoring-dashboard" | tr '[:upper:]' '[:lower:]')
+          echo "image=ghcr.io/${REPO}" >> "$GITHUB_OUTPUT"
+          echo "sha=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile
+          push: true
+          tags: |
+            ${{ steps.meta.outputs.image }}:latest
+            ${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy over SSH with smoke test and rollback
+        uses: appleboy/ssh-action@v1
+        env:
+          IMAGE: ${{ needs.build-and-push.outputs.image }}
+          SHA: ${{ needs.build-and-push.outputs.sha }}
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          envs: IMAGE,SHA
+          script: |
+            set -e
+            cd /opt/monitoring-dashboard
+
+            # Record the currently running image so we can roll back.
+            PREVIOUS=$(docker inspect --format='{{.Config.Image}}' monitoring-web 2>/dev/null || echo "${IMAGE}:latest")
+
+            docker pull "${IMAGE}:${SHA}"
+            docker tag "${IMAGE}:${SHA}" "${IMAGE}:latest"
+            docker compose up -d --no-deps web
+
+            echo "Running smoke test…"
+            for i in $(seq 1 10); do
+              if curl --fail --silent https://your-domain.com/api/metrics/system; then
+                echo "Smoke test passed."
+                exit 0
+              fi
+              sleep 5
+            done
+
+            echo "Smoke test FAILED — rolling back to ${PREVIOUS}"
+            docker tag "${PREVIOUS}" "${IMAGE}:latest"
+            docker compose up -d --no-deps web
+            exit 1

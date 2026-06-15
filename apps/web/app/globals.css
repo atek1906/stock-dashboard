@@ -1,0 +1,61 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Light theme */
+    --bg: 210 40% 98%;
+    --card: 0 0% 100%;
+    --border: 214 32% 88%;
+    --text-primary: 222 47% 11%;
+    --text-secondary: 215 16% 47%;
+    --shadow-color: 215 25% 27%;
+  }
+
+  .dark {
+    /* Dark theme (default) — matches the spec palette */
+    --bg: 225 21% 7%; /* #0f1117 */
+    --card: 226 20% 13%; /* #1a1d27 */
+    --border: 229 16% 20%; /* #2a2d3a */
+    --text-primary: 214 32% 91%; /* #e2e8f0 */
+    --text-secondary: 215 20% 65%; /* #94a3b8 */
+    --shadow-color: 225 40% 2%;
+  }
+
+  * {
+    border-color: hsl(var(--border));
+  }
+
+  body {
+    background-color: hsl(var(--bg));
+    color: hsl(var(--text-primary));
+    font-feature-settings: "cv11", "ss01";
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+@layer components {
+  .panel {
+    @apply rounded-card border bg-card p-4 transition-transform duration-200;
+    box-shadow: 0 1px 3px hsl(var(--shadow-color) / 0.25);
+  }
+
+  .panel-hover {
+    @apply hover:scale-[1.01];
+  }
+
+  .label-caps {
+    @apply text-xs font-medium uppercase tracking-wide text-text-secondary;
+  }
+}
+
+/* Thin scrollbars for the alert feed and tables */
+.scroll-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.scroll-thin::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 9999px;
+}
