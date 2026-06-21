@@ -69,7 +69,7 @@ export function PriceChart({ stock }: { stock: StockData }) {
   const interval = Math.max(0, Math.floor(data.length / 7) - 1);
 
   return (
-    <ResponsiveContainer width="100%" height={240}>
+    <ResponsiveContainer width="100%" height={280}>
       <ComposedChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: -8 }}>
         <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
         <XAxis
