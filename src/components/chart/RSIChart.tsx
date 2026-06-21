@@ -19,7 +19,7 @@ export function RSIChart({ stock }: { stock: StockData }) {
   );
 
   return (
-    <ResponsiveContainer width="100%" height={85}>
+    <ResponsiveContainer width="100%" height={100}>
       <LineChart data={data} margin={{ top: 4, right: 8, bottom: 0, left: -8 }}>
         <XAxis dataKey="date" hide />
         <YAxis
