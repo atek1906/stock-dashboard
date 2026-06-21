@@ -24,7 +24,7 @@ export function StockTable({
   onRemove,
 }: StockTableProps) {
   return (
-    <div className="scroll-thin max-h-[520px] overflow-y-auto">
+    <div>
       <table className="w-full text-sm">
         <thead className="sticky top-0 bg-surface">
           <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted">
@@ -36,19 +36,19 @@ export function StockTable({
         </thead>
         <tbody>
           {isLoading
-            ? Array.from({ length: 8 }).map((_, i) => (
+            ? Array.from({ length: 10 }).map((_, i) => (
                 <tr key={i} className="border-b border-border/60">
-                  <td className="px-3 py-2.5">
+                  <td className="px-3 py-2">
                     <Skeleton className="h-3 w-20" />
                     <Skeleton className="mt-1 h-2.5 w-28" />
                   </td>
-                  <td className="px-3 py-2.5">
+                  <td className="px-3 py-2">
                     <Skeleton className="ml-auto h-3 w-14" />
                   </td>
-                  <td className="px-3 py-2.5">
+                  <td className="px-3 py-2">
                     <Skeleton className="ml-auto h-3 w-10" />
                   </td>
-                  <td className="px-3 py-2.5">
+                  <td className="px-3 py-2">
                     <Skeleton className="ml-auto h-4 w-12" />
                   </td>
                 </tr>
@@ -65,7 +65,7 @@ export function StockTable({
                       active ? "bg-blue/10" : "hover:bg-surface-2"
                     )}
                   >
-                    <td className="px-3 py-2.5">
+                    <td className="px-3 py-2">
                       <div className="flex items-center gap-1.5">
                         {onRemove && (
                           <button
@@ -83,12 +83,12 @@ export function StockTable({
                       </div>
                       <div className="truncate text-xs text-muted">{s.name}</div>
                     </td>
-                    <td className="px-3 py-2.5 text-right tabular-nums text-text">
+                    <td className="px-3 py-2 text-right tabular-nums text-text">
                       {formatPrice(s.currentPrice, s.currency)}
                     </td>
                     <td
                       className={cn(
-                        "px-3 py-2.5 text-right tabular-nums",
+                        "px-3 py-2 text-right tabular-nums",
                         s.changePct === null ? "text-muted" : up ? "text-green" : "text-red"
                       )}
                     >
@@ -98,7 +98,7 @@ export function StockTable({
                         {formatPct(s.changePct)}
                       </span>
                     </td>
-                    <td className="px-3 py-2.5 text-right">
+                    <td className="px-3 py-2 text-right">
                       <SignalBadge signal={s.signal} />
                     </td>
                   </tr>
