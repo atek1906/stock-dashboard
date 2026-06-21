@@ -7,6 +7,8 @@ import { nameForSymbol } from "@/lib/stocks";
 
 export const revalidate = 300;
 export const runtime = "nodejs";
+// Fetching many symbols can exceed the 10s Hobby default; allow more headroom.
+export const maxDuration = 30;
 
 const VALID_RANGES: ChartRange[] = ["1mo", "3mo", "6mo", "1y", "ytd"];
 
